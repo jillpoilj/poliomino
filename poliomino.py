@@ -97,16 +97,19 @@ class PoliL(PoliBase):
         
 def solve_poliomino(polis):
     states = []
-    for poli in polis:
+    #each element of 'states' is a list of all possible positions (and rotations)
+    #of a corresponding poliomino
+    for poli in polis:        
         if type(poli) is PoliSquare:
             states.append(list(itertools.product(range(poli.max_x), range(poli.max_y))))
         else:
             #third coordinate is rotation
             states.append(list(itertools.product(range(poli.max_x), range(poli.max_y), range(4))))
         
-        
+    #combination of all possible states is a placement
     placements = itertools.product(*states)
 
+    #check all placements if they are possible
     for placement in placements:
         Field.clear()
         for poli, state in zip(polis, placement):
@@ -118,7 +121,8 @@ def solve_poliomino(polis):
     print('Impossible')
     return False
 
-def parse_input_and_run(s):
+def parse_input_and_run(s):    
+    
     fw = int(s[s.find('(')+1 : s.find(',')])
     
     fh = int(s[s.find(',')+1 : s.find(')')])
@@ -148,8 +152,6 @@ def parse_input_and_run(s):
         for _ in range(pn):
             polis.append(PoliL(pw, ph))
         qs = qs[qs.find(')', t+2) + 2 : ]
-
-
 
     solve_poliomino(polis)
 
