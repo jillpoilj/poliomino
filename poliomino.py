@@ -23,6 +23,10 @@ class PoliSquare(PoliBase):
         super(PoliSquare, self).__init__(width, height)
         
     def check_and_place(self, x, y, rotation, field):
+        """
+        Try to place the poli in specified position. Returns True if 
+        successful. Modifies field in-place, even on failure.
+        """   
         if rotation == 0:
             if x + self.width > field.shape[0] or y + self.height > field.shape[1]:
                 return False
@@ -46,7 +50,7 @@ class PoliSquare(PoliBase):
         
     def get_states(self, width, height):
         """
-        returns iterator of all possible positions of this polio
+        return list of all possible positions of this poliomino
         """
         
         max_x = width - self.width
@@ -56,7 +60,7 @@ class PoliSquare(PoliBase):
         if self.width == self.height:
             return s1
         
-        #rotated
+        # rotated
         max_x = width - self.height
         max_y = height - self.width
         s2 = list(itertools.product(range(max_x + 1), range(max_y + 1), [1]))
@@ -69,6 +73,10 @@ class PoliL(PoliBase):
 
 
     def check_and_place(self, x, y, rotation, field):
+        """
+        Try to place the poli in specified position. Returns True if 
+        successful. Modifies field in-place, even on failure.
+        """        
         # x to the right, y to the top
         if rotation == 0:
             # \_ shape
@@ -106,7 +114,7 @@ class PoliL(PoliBase):
         
     def get_states(self, width, height):
         """
-        returns iterator of all possible positions of this polio
+        return list of all possible positions of this poliomino
         """
         
         max_x = width - self.width
@@ -119,36 +127,28 @@ class PoliL(PoliBase):
         s2 = list(itertools.product(range(max_x + 1), range(max_y + 1), [1, 3]))
         return s1 + s2
 
+
 def solve_poliomino(width, height, polis):
-    fields = [np.zeros((width, height))]
-    for poli in polis: 
-        states = poli.get_states(width, height)
-        new_fields = []
-        print('Next poli:')
-        for field in fields:
-            # print('Field now is: ')
-            # print(field)
-            for state in states:
-                new_field = field.copy()
-                if poli.check_and_place(*state, field=new_field):
-                    new_fields.append(new_field)
-            #         print(state, ' : ')
-            #         print(new_field)
-            # print('End field')
-        fields = new_fields
-        
-        
-    if fields:
+    if solve_poliomino_recursive(polis, np.zeros((width, height))):
         print('Possible!')
         return True
     else:
         print('Impossible')
         return False
-
-def solve_poliomino_depth(width, height, polis):
-    fields = [np.zeros((width, height))]
-    for poli in polis:
-        pass
+    
+def solve_poliomino_recursive(polis, field):
+    width = field.shape[0]
+    height = field.shape[1]
+    current_poli = polis[0]
+    for state in current_poli.get_states(width, height):
+        new_field = field.copy()
+        if current_poli.check_and_place(*state, field=new_field):
+            if len(polis) == 1:
+                return True
+            if solve_poliomino_recursive(polis[1:], new_field):
+                return True
+    return False
+                
 
 
 def parse_input(s):    
